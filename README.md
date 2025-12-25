@@ -13,6 +13,7 @@ Table of contents
 - Installation
 - Usage
   - Interactive (main.py)
+  - Executable (recommended)
   - Module examples
 - Outputs
 - Development
