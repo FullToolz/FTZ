@@ -1,0 +1,119 @@
+name: Build on dev → main merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-merge:
+    name: Ensure merge from dev
+    runs-on: ubuntu-latest
+    outputs:
+      merged: ${{ steps.check.outputs.merged }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: check
+        run: |
+          git log -1 --pretty=%B | grep -q "Merge branch 'dev'" \
+            && echo "merged=true" >> $GITHUB_OUTPUT \
+            || echo "merged=false" >> $GITHUB_OUTPUT
+
+  build:
+    needs: check-merge
+    if: needs.check-merge.outputs.merged == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ---------------- VERSION BUMP ----------------
+      - name: Bump version
+        run: |
+          VERSION=$(cat VERSION)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "$NEW_VERSION" > VERSION
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add VERSION
+          git commit -m "chore: bump version to v$VERSION"
+          git push
+
+      # ---------------- WINDOWS BUILD ----------------
+      - name: Build Windows EXE
+        runs-on: windows-latest
+        steps:
+          - uses: actions/checkout@v4
+
+          - uses: actions/setup-python@v5
+            with:
+              python-version: "3.11"
+
+          - run: |
+              pip install pyinstaller
+              pyinstaller --onefile main.py --name fulltoolz
+
+          - run: |
+              mv dist/fulltoolz.exe \
+                 fulltoolz-windows-v${{ env.VERSION }}.exe
+            shell: bash
+
+          - uses: actions/upload-artifact@v4
+            with:
+              name: windows
+              path: fulltoolz-windows-v*.exe
+
+      # ---------------- LINUX APPIMAGE ----------------
+      - name: Build Linux AppImage
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+
+          - uses: actions/setup-python@v5
+            with:
+              python-version: "3.11"
+
+          - run: |
+              sudo apt update
+              sudo apt install -y fuse libfuse2 patchelf
+              pip install pyinstaller
+
+          - run: |
+              pyinstaller --onefile main.py --name fulltoolz
+
+          - run: |
+              mkdir -p AppDir/usr/bin
+              mv dist/fulltoolz AppDir/usr/bin/
+              chmod +x AppDir/usr/bin/fulltoolz
+
+              echo '[Desktop Entry]
+              Name=FullToolz
+              Exec=fulltoolz
+              Type=Application' > AppDir/fulltoolz.desktop
+
+              echo -e '#!/bin/sh\nexec usr/bin/fulltoolz "$@"' > AppDir/AppRun
+              chmod +x AppDir/AppRun
+
+          - run: |
+              wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+              chmod +x appimagetool-x86_64.AppImage
+              ./appimagetool-x86_64.AppImage AppDir
+
+          - run: |
+              mv FullToolz-x86_64.AppImage \
+                 fulltoolz-linux-v${{ env.VERSION }}.AppImage
+
+          - uses: actions/upload-artifact@v4
+            with:
+              name: linux
+              path: fulltoolz-linux-v*.AppImage
