@@ -1,6 +1,6 @@
 import pytest
 
-from /home/runner/work/FTZ/FTZ/HexoRat import has_cmp, has_jcc, has_xor, has_backward_jump, score_window
+from HexoRat import has_cmp, has_jcc, has_xor, has_backward_jump, score_window
 
 
 def test_feature_detection_and_scoring():
@@ -46,14 +46,12 @@ def test_empty_window():
 
 
 
-import pytest
-
 from pathlib import Path
 
 import builtins
 
 
-from /home/runner/work/FTZ/FTZ/HexoRat import main
+from /HexoRat import main
 
 
 def test_hexorat_main_high_hint(tmp_path, monkeypatch, capsys):
