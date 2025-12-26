@@ -51,7 +51,7 @@ from pathlib import Path
 import builtins
 
 
-from /HexoRat import main
+from HexoRat import main
 
 
 def test_hexorat_main_high_hint(tmp_path, monkeypatch, capsys):
