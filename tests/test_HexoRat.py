@@ -46,8 +46,6 @@ def test_empty_window():
 
 
 
-import pytest
-
 from pathlib import Path
 
 import builtins
