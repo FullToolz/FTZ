@@ -1,0 +1,39 @@
+name: Python Tests
+
+# Run on push and PR events
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  test:
+    name: Run all tests with pytest
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install rich
+          # Add other dependencies if your tests require them
+
+      - name: Run pytest on tests/
+        run: |
+          pytest tests/ --maxfail=1 --disable-warnings
