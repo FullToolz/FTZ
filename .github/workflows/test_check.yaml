@@ -34,6 +34,6 @@ jobs:
           pip install rich
           # Add other dependencies if your tests require them
 
-      - name: Run pytest on tests/
+      - name: Run pytest on Python test files only
         run: |
-          pytest tests/ --maxfail=1 --disable-warnings
+          pytest tests/**/*.py --maxfail=1 --disable-warnings
