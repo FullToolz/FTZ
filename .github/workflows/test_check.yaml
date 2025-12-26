@@ -33,7 +33,8 @@ jobs:
           pip install pytest
           pip install rich
           # Add other dependencies if your tests require them
-
-      - name: Run pytest on Python test files only
+      - name: Run pytest
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: |
           pytest tests --maxfail=1 --disable-warnings
