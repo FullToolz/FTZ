@@ -4,7 +4,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from strSniffer import extract_strings, find_keywords, sort_hits
+from strSniffer import *
 
 def test_extract_strings_ascii(tmp_path):
     # create a file with an ASCII string of length ≥ 4
