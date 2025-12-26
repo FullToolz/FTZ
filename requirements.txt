@@ -1,0 +1,2 @@
+[requirements]
+rich = 14.2.0
