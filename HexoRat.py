@@ -1,32 +1,37 @@
+with open(path, "rb") as f:
+    data = f.read()
+
+WINDOW = 32
+
+# ---------------- helper functions ----------------
+
+
+def has_cmp(window):
+    return any(0x38 <= b <= 0x3F for b in window)
+
+
+def has_jcc(window):
+    return any(0x70 <= b <= 0x7F for b in window)
+
+
+def has_xor(window):
+    return any(0x30 <= b <= 0x35 for b in window)
+
+
+def has_backward_jump(window):
+    for j, b in enumerate(window):
+        if 0x70 <= b <= 0x7F:
+            if j + 1 >= len(window):
+                continue
+            offset = window[j + 1]
+            if offset & 0x80:  # negative jump
+                return True
+    return False
+
+
 def main(path):
     from rich.console import Console
     from rich.table import Table
-
-    with open(path, "rb") as f:
-        data = f.read()
-
-    WINDOW = 32
-
-    # ---------------- helper functions ----------------
-
-    def has_cmp(window):
-        return any(0x38 <= b <= 0x3F for b in window)
-
-    def has_jcc(window):
-        return any(0x70 <= b <= 0x7F for b in window)
-
-    def has_xor(window):
-        return any(0x30 <= b <= 0x35 for b in window)
-
-    def has_backward_jump(window):
-        for j, b in enumerate(window):
-            if 0x70 <= b <= 0x7F:
-                if j + 1 >= len(window):
-                    continue
-                offset = window[j + 1]
-                if offset & 0x80:  # negative jump
-                    return True
-        return False
 
     def score_window(w):
         score = 0
