@@ -4,7 +4,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import pytest
 
-from HexoRat import *
+from HexoRat import has_cmp, has_jcc, has_xor, has_backward_jump, score_window
+from Hexorat import *
+
 
 
 def test_feature_detection_and_scoring():
