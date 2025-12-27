@@ -1,6 +1,3 @@
-with open(path, "rb") as f:
-    data = f.read()
-
 WINDOW = 32
 
 # ---------------- helper functions ----------------
@@ -32,6 +29,9 @@ def has_backward_jump(window):
 def main(path):
     from rich.console import Console
     from rich.table import Table
+
+    with open(path, "rb") as f:
+        data = f.read()
 
     def score_window(w):
         score = 0
