@@ -14,9 +14,25 @@ def extract_strings(path, min_len=4):
     results = []
 
     # ASCII strings
-    ascii_re = rb"[ -~]{" + str(min_len).encode() + rb",}"
-    for m in re.finditer(ascii_re, data):
-        results.append((m.start(), m.group().decode("ascii", errors="ignore")))
+    results = []
+    buf = bytearray()
+    start = None
+
+    for i, b in enumerate(data):
+        if 32 <= b <= 126:
+            if not buf:
+                start = i
+            buf.append(b)
+        else:
+            if buf and len(buf) >= min_len:
+                results.append((start, buf.decode("ascii")))
+            buf.clear()
+            start = None
+
+    # catch trailing
+    if buf and len(buf) >= min_len:
+        results.append((start, buf.decode("ascii")))
+
 
     # UTF-16LE strings
     utf16_re = rb"(?:[ -~]\x00){" + str(min_len).encode() + rb",}"
@@ -165,3 +181,4 @@ def main(target):
 if __name__ == "__main__":
     path = input(">> ")
     main(path)
+
